@@ -112,10 +112,5 @@ def _(OUTPUT_DIESEL_FP, weekly_diesel_prices):
     return
 
 
-@app.cell
-def _():
-    return
-
-
 if __name__ == "__main__":
     app.run()
