@@ -2,6 +2,7 @@
 # dependencies = [
 #     "cpi==2.0.10",
 #     "marimo",
+#     "mcp==2.2.0",
 #     "pandas==3.0.6",
 #     "ty==0.0.82",
 #     "xlrd==2.0.2",
@@ -30,8 +31,13 @@ def _():
 @app.cell
 def _(cpi):
     cpi.update()
+    return
 
+
+@app.cell
+def _(cpi):
     def inflation_adjust(row):
+        print(f"Here: {row}")
         try:
             return cpi.inflate(
                 row["Price"],
@@ -44,7 +50,7 @@ def _(cpi):
 
 
 @app.cell
-def _(Path, inflation_adjust, pd):
+def _(Path, pd):
     DIESEL_PRICE_DATA_FP = Path("./inputs/psw18vwall.xls")
     READ_COLUMNS = [
         "Date",
@@ -52,37 +58,58 @@ def _(Path, inflation_adjust, pd):
     ]
     COLUMN_RENAMES = ["Date", "Price"]
 
-    weekly_diesel_prices = pd.read_excel(
+    weekly_diesel_raw_prices = pd.read_excel(
         DIESEL_PRICE_DATA_FP,
         sheet_name="Data 1",
         skiprows=2,
     )
-    weekly_diesel_prices = weekly_diesel_prices[READ_COLUMNS]
+    return COLUMN_RENAMES, READ_COLUMNS, weekly_diesel_raw_prices
+
+
+@app.cell
+def _(Path, pd):
+    OUTPUT_DIESEL_FP = Path("./outputs/inflation_adjust_diesel.csv")
+    if OUTPUT_DIESEL_FP.exists():
+        cached_inf_adjs = pd.read_csv(OUTPUT_DIESEL_FP, parse_dates=["Date"])
+        # cached_inf_adjs["Date"] = pd.to_datetime(cached_inf_adjs["Date"])
+        cached_inf_adjs = {
+            row["Date"]: row["inflation_adjusted_price"]
+            for _, row in cached_inf_adjs.iterrows()
+        }
+    else:
+        cached_inf_adjs = dict()
+    return OUTPUT_DIESEL_FP, cached_inf_adjs
+
+
+@app.cell
+def _(
+    COLUMN_RENAMES,
+    READ_COLUMNS,
+    cached_inf_adjs,
+    inflation_adjust,
+    weekly_diesel_raw_prices,
+):
+    def inflation_adjust_cached(row, cached=cached_inf_adjs):
+        if row["Date"] in cached:
+            return cached.get(row["Date"])
+        return inflation_adjust(row)
+
+    weekly_diesel_prices = weekly_diesel_raw_prices[READ_COLUMNS]
     weekly_diesel_prices.columns = COLUMN_RENAMES
 
     weekly_diesel_prices["inflation_adjusted_price"] = (
-        weekly_diesel_prices.apply(inflation_adjust, axis=1)
+        weekly_diesel_prices.apply(inflation_adjust_cached, axis=1)
     )
     return (weekly_diesel_prices,)
 
 
 @app.cell
-def _(OUTPUT_DIESEL_FP, pd):
-    if OUTPUT_DIESEL_FP.exists():
-        cached_inf_adjs = pd.read_csv(OUTPUT_DIESEL_FP)
-
-    cached_inf_adjs
-    return
-
-
-@app.cell
-def _(Path, weekly_diesel_prices):
-    OUTPUT_DIESEL_FP = Path("./outputs/inflation_adjust_diesel.csv")
+def _(OUTPUT_DIESEL_FP, weekly_diesel_prices):
     weekly_diesel_prices.to_csv(OUTPUT_DIESEL_FP, index=False)
     weekly_diesel_prices.sort_values(
         "inflation_adjusted_price", ascending=False
     )
-    return (OUTPUT_DIESEL_FP,)
+    return
 
 
 @app.cell
