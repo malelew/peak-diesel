@@ -1,9 +1,10 @@
 # /// script
 # dependencies = [
-#     "cpi==2.0.10",
+#     "cpi==2.1.0",
 #     "marimo",
 #     "mcp==2.2.0",
 #     "pandas==3.0.6",
+#     "requests==2.34.2",
 #     "ty==0.0.82",
 #     "xlrd==2.0.2",
 # ]
@@ -12,7 +13,7 @@
 
 import marimo
 
-__generated_with = "0.24.2"
+__generated_with = "0.25.0"
 app = marimo.App(width="medium")
 
 
@@ -24,6 +25,7 @@ def _():
     import cpi
     import marimo as mo
     import pandas as pd
+    import requests
 
     return Path, cpi, pd
 
@@ -37,11 +39,13 @@ def _(cpi):
 @app.cell
 def _(cpi):
     def inflation_adjust(row):
-        print(f"Here: {row}")
         try:
-            return cpi.inflate(
-                row["Price"],
-                row["Date"],
+            return round(
+                cpi.inflate(
+                    row["Price"],
+                    row["Date"],
+                ),
+                3,
             )
         except:
             return row["Price"]
@@ -52,6 +56,10 @@ def _(cpi):
 @app.cell
 def _(Path, pd):
     DIESEL_PRICE_DATA_FP = Path("./inputs/psw18vwall.xls")
+    DIESEL_HISTORICAL_PRICES_DATA_URL = (
+        "https://www.eia.gov/petroleum/gasdiesel/xls/psw18vwall.xls"
+    )
+
     READ_COLUMNS = [
         "Date",
         "Weekly U.S. No 2 Diesel Retail Prices  (Dollars per Gallon)",
@@ -59,10 +67,11 @@ def _(Path, pd):
     COLUMN_RENAMES = ["Date", "Price"]
 
     weekly_diesel_raw_prices = pd.read_excel(
-        DIESEL_PRICE_DATA_FP,
+        DIESEL_HISTORICAL_PRICES_DATA_URL,
         sheet_name="Data 1",
         skiprows=2,
     )
+    weekly_diesel_raw_prices.to_csv(DIESEL_PRICE_DATA_FP)
     return COLUMN_RENAMES, READ_COLUMNS, weekly_diesel_raw_prices
 
 
@@ -90,8 +99,8 @@ def _(
     weekly_diesel_raw_prices,
 ):
     def inflation_adjust_cached(row, cached=cached_inf_adjs):
-        if row["Date"] in cached:
-            return cached.get(row["Date"])
+        # if row["Date"] in cached:
+        #     return cached.get(row["Date"])
         return inflation_adjust(row)
 
     weekly_diesel_prices = weekly_diesel_raw_prices[READ_COLUMNS]
@@ -100,6 +109,9 @@ def _(
     weekly_diesel_prices["inflation_adjusted_price"] = (
         weekly_diesel_prices.apply(inflation_adjust_cached, axis=1)
     )
+    weekly_diesel_prices["price_rank"] = weekly_diesel_prices[
+        "inflation_adjusted_price"
+    ].rank(ascending=False)
     return (weekly_diesel_prices,)
 
 
@@ -109,6 +121,21 @@ def _(OUTPUT_DIESEL_FP, weekly_diesel_prices):
     weekly_diesel_prices.sort_values(
         "inflation_adjusted_price", ascending=False
     )
+    return
+
+
+@app.cell
+def _(weekly_diesel_prices):
+    weekly_diesel_prices.sort_values("Date", ascending=False).to_json(
+        "./peakdiesel-app/static/weekly_diesel_prices.json",
+        orient="records",
+        date_format="iso",
+    )
+    return
+
+
+@app.cell
+def _():
     return
 
 
