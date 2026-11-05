@@ -9,7 +9,14 @@
 </script>
 
 <h2>Have we reached peak diesel prices?</h2>
-<h1>No</h1>
+{#if latestPrice.price_rank == 1}
+	<h1>Yes</h1>
+	<!-- content here -->
+{:else}
+	<h1>No</h1>
+	<!-- content here -->
+{/if}
+
 <p>
 	The latest weekly update had diesel at ${latestPrice.Price} per gallon, adjusted for inflation this
 	ranks as the {formatRank(latestPrice.price_rank)} highest price on record in the United States.
