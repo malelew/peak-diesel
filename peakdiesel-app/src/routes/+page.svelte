@@ -14,7 +14,7 @@
 {#if isPeak}
 	<h1>Yes</h1>
 {:else}
-	<h1>No</h1>
+	<h1 class='not-peak'>No</h1>
 {/if}
 
 <p>
@@ -36,4 +36,8 @@
 	p {
 		text-align: center;
 	}
+
+  .not-peak {
+    color: white;
+  }
 </style>
