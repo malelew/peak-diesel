@@ -9,12 +9,12 @@
   let isPeak = $derived(latestPrice.price_rank == 1)
 </script>
 
-<main class={['px-2', 'py-8', 'min-h-screen', isPeak ? 'bg-orange-600': 'bg-blue-600']}>
+<main class={['px-2', 'py-8', 'min-h-screen', isPeak ? 'bg-orange-600': 'bg-blue-600 not-peak']}>
 <h2>Have we reached peak diesel prices?</h2>
 {#if isPeak}
 	<h1>Yes</h1>
 {:else}
-	<h1 class='not-peak'>No</h1>
+	<h1>No</h1>
 {/if}
 
 <p>
