@@ -10,12 +10,10 @@
 </script>
 
 <main class="px-2 py-8 min-h-screen" class:bg-orange-600={isPeak} class:bg-blue-600={!isPeak} class:not-peak={!isPeak}>
-<h2>Have we reached peak diesel prices?</h2>
-{#if isPeak}
-	<h1>Yes</h1>
-{:else}
-	<h1>No</h1>
-{/if}
+<h2 class="text-center text-lg">Have we reached peak diesel prices?</h2>
+<h1 class="text-center text-8xl font-black tracking-tight">
+  {isPeak ? 'Yes' : 'No'}
+</h1>
 
 <p>
 	The latest weekly update had diesel at ${latestPrice.Price} per gallon, adjusted for inflation this
