@@ -1,8 +1,6 @@
 @layer theme, base, components, utilities;
-@import "tailwindcss/theme.css" layer(theme);
-@import "tailwindcss/utilities.css" layer(utilities);
+@import 'tailwindcss';
 
 body {
-    font-family: 'Source Sans 3', system-ui, sans-serif;
-    margin: 0;
+	font-family: 'Source Sans 3 Variable', system-ui, sans-serif;
 }
