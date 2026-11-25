@@ -10,7 +10,7 @@
 </script>
 
 <main
-	class="min-h-screen px-2 py-8 text-center"
+	class="min-h-screen px-2 py-8 text-center text-balance"
 	class:bg-orange-500={isPeak}
 	class:bg-blue-700={!isPeak}
 	class:text-white={!isPeak}
