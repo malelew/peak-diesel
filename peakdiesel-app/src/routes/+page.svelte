@@ -20,9 +20,11 @@
 		{isPeak ? 'Yes' : 'No'}
 	</h1>
 
-	<p>
-		The latest weekly update had diesel at ${latestPrice.Price} per gallon, adjusted for inflation this
-		ranks as the {formatRank(latestPrice.price_rank)} highest price on record in the United States.
-	</p>
-	<p>National diesel weekly price update reported on {latestDate}.</p>
+	<div class="mx-auto max-w-prose text-left">
+		<p>
+			The latest weekly update had diesel at ${latestPrice.Price} per gallon, adjusted for inflation this
+			ranks as the {formatRank(latestPrice.price_rank)} highest price on record in the United States.
+		</p>
+		<p>National diesel weekly price update reported on {latestDate}.</p>
+	</div>
 </main>
