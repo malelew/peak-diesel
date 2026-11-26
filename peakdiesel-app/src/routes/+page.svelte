@@ -18,10 +18,9 @@
 </script>
 
 <main
-	class="flex min-h-screen flex-col justify-center gap-10 px-8 py-8 text-center"
-	class:bg-orange-500={isPeak}
+	class="flex min-h-screen flex-col justify-center gap-10 px-8 py-8 text-center text-white"
+	class:bg-orange-800={isPeak}
 	class:bg-blue-700={!isPeak}
-	class:text-white={!isPeak}
 >
 	<header class="space-y-1">
 		<h2 class="text-xl text-balance">Have we reached peak diesel prices?</h2>
